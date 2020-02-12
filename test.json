@@ -1,0 +1,25 @@
+{
+    "config": {
+        "target": "http://localhost:9001",
+        "phases": [
+            {"duration": 60, "arrivalRate": 200}
+        ],
+        "defaults": {
+            "headers": {
+                "User-Agent": "Artillery"
+            }
+        }
+    },
+    "scenarios": [
+        {
+            "name": "유저테스트",
+            "flow": [
+                {"get":
+                    {
+                        "url": "/test"
+                    }
+                }
+            ]
+        }
+    ]
+}

@@ -31,16 +31,30 @@ app.ws("/*", {
         console.log("close > message", convertClosedMessage(message))
     }
 }).get("/test", (res: HttpResponse, req: HttpRequest) => {
-    console.log(req)
-    clients[0].publish("hello", JSON.stringify({test: "hi"}))
-    console.log("send")
-    res.end("hi");
+    try {
+        console.log(req)
+        for (let i = 0; i < 10000; i++) {
+            clients[0].publish(`hello/${i}`, JSON.stringify({test: "hi", i}))    
+        }
+        console.log("send")
+        res.end("hi");
+    } catch(e) {
+        console.error(e, typeof e)
+        if (typeof e === "string" && e === "Invalid access of closed uWS.WebSocket/SSLWebSocket.") {
+            clients = []
+        }
+        if (clients[0] === undefined) {
+            clients = []
+        }
+        res.end("error")
+    }
+    
 }).listen(9001, (socket) => {
     if (socket) {
         console.log('Listening to port 9001');
     }
 })
-const clients: WebSocket[] = [];
+let clients: WebSocket[] = [];
 const convertClientMessage = (message: ArrayBuffer): CustomMessage => JSON.parse(bufToString(message));
 const convertClosedMessage = (message: ArrayBuffer): string => bufToString(message);
 const bufToString = (buf: ArrayBuffer): string =>{
@@ -50,7 +64,7 @@ const bufToString = (buf: ArrayBuffer): string =>{
 }
 
 const addSubscribe = (ws: WebSocket, message: CustomMessage): void => {
-    ws.subscribe(`${message.subscribe}`);
+    ws.subscribe(`${message.subscribe}/#`);
 };
 
 const excuteMessage = (ws: WebSocket, message: CustomMessage) => {

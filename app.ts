@@ -16,7 +16,7 @@ if (Cluster.isMaster) {
         Cluster.fork();
     });
     Cluster.on('message', (worker: Worker, message: any, handle) => {
-        console.log("master receive message from ${worker.process.pid} ${worker.id}: ", message)
+        console.log(`master receive message from ${worker.process.pid} ${worker.id}: `, message)
     });
     console.log("cpuLength: ", cpuLength)
     for (let i = 0; i < cpuLength; i++) {

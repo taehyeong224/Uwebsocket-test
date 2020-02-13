@@ -19,11 +19,14 @@
   },
   "homepage": "https://github.com/taehyeong224/Uwebsocket-test#readme",
   "dependencies": {
+    "aws-sdk": "^2.617.0",
+    "lodash": "^4.17.15",
     "shortid": "^2.2.15",
     "uWebSockets.js": "github:uNetworking/uWebSockets.js#v17.1.0",
     "ws": "^7.2.1"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.149",
     "@types/node": "^13.1.0",
     "@types/shortid": "0.0.29",
     "ts-node": "^8.5.4",

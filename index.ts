@@ -1,5 +1,39 @@
 import { App, HttpRequest, WebSocket, HttpResponse } from "uWebSockets.js"
 import { generate } from "shortid";
+import _ from "lodash";
+import AWS from "aws-sdk";
+import { MessageList, ReceiveMessageResult } from "aws-sdk/clients/sqs";
+AWS.config.loadFromPath('./awsconfig.json');
+const sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
+const QUEUE_URL = "https://sqs.ap-northeast-2.amazonaws.com/658082685114/test";
+sqs.listQueues((err, data) => {
+    console.log(data);
+})
+let messageList = [];
+const PARAMS = {
+    QueueUrl: QUEUE_URL,
+    MaxNumberOfMessages: 10
+};
+const MessageEvent = {
+    newMessage: "newMessage",
+    deleteMessage: "deleteMessage",
+    updateMessage: "updateMessage"
+}
+
+const onReceiveMessage = (messages: ReceiveMessageResult) => {
+    if (!_.isNil(messages.Messages)) {
+        messages.Messages.forEach(message => {
+            console.log(message.Body);
+            pushMessageToListAll(message.Body);
+        });
+    }
+    return messages;
+}
+
+const pushMessageToListAll = (message: string | undefined) => {
+    messageList.push(message === undefined ? "" : message)
+}
+
 const app = App()
 
 app.ws("/*", {

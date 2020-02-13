@@ -1,7 +1,19 @@
 <html>
 <head>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.8.20/dayjs.min.js"></script>
+    
     <script src="client2.js"></script>
-    <input type="text" id="input"/>
-    <button onclick="sendMessage"></button>
 </head>
+<body>
+    <div>
+        <ul id="chat-list"></ul>
+    </div>
+    <div>
+        <label for="userId">이름</label>
+        <input type="text" id="user"/>
+        <input type="text" id="input"/>
+        <button onclick="sendMessage()">전송</button>
+    </div>
+</body>
 </html>

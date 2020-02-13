@@ -1,3 +1,19 @@
+function sendMessage() {
+    console.log("hi")
+    const userId = document.getElementById("user").value;
+    const message = document.getElementById("input").value;
+    axios.post(`http://localhost:3000/chat`, {
+        userId,
+        message
+      })
+      .then(function (response) {
+        addChatInList({date: Number(new Date()), userId, text: message})
+      })
+      .catch(function (error) {
+        addChatInList({date: Number(new Date()), userId, text: message})
+      });
+}
+
 if (!window.indexedDB) {
     window.alert("Your browser doesn't support a stable version of IndexedDB. Such and such feature will not be available.")
 }
@@ -66,8 +82,12 @@ const connect = () => {
     }
     
     socket.onmessage = (e) => {
-        const {data,type,target} = e;
-        // console.log(convertMessageToObject(data));
+        try {
+            const {data,type,target} = e;
+            executeJob(convertMessageToObject(data));
+        } catch (e) {
+            console.error("onmessage error : ", e)
+        }
     }
     
     socket.onclose = (e) => {
@@ -79,7 +99,27 @@ connect();
 
 const convertMessageToObject = (data) => JSON.parse(data);
 
-const sendMessage = () => {
-    const dom = document.getElementById("input");
-    socket.send(JSON.stringify({text: dom.value}))
+const executeJob = message => {
+    switch(message.type) {
+        case MessageType.RECEIVE_MESSAGE:
+            break;
+    }
+}
+
+const MessageType = {
+    RECEIVE_MESSAGE: "RECEIVE_MESSAGE"
+}
+
+const addChatInList = (message) => {
+    if (!message || !message.text) {
+        throw new Error("no message");
+    }
+    const listDom = document.getElementById("chat-list");
+    if (!listDom) {
+        throw new Error("no chat-list");
+    }
+    const li = document.createElement("li")
+    const text = document.createTextNode(`[${dayjs(message.date).format("HH:mm")}] ${message.userId}: ${message.text}`);
+    li.appendChild(text);
+    listDom.appendChild(li);
 }

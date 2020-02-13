@@ -109,3 +109,5 @@ dist
 .vscode/
 
 package-lock.json
+app.js
+index.js

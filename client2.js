@@ -78,3 +78,8 @@ const connect = () => {
 connect();
 
 const convertMessageToObject = (data) => JSON.parse(data);
+
+const sendMessage = () => {
+    const dom = document.getElementById("input");
+    socket.send(JSON.stringify({text: dom.value}))
+}

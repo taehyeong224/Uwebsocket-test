@@ -4,7 +4,7 @@ const connect = () => {
     
     socket.onopen = () => {
         console.log("on open")
-        socket.send(JSON.stringify({type:"SUBSCRIBE", subscribe: "hello"}))
+        socket.send(JSON.stringify({type:"SUBSCRIBE", subscribe: "hello2"}))
     }
     
     
@@ -15,7 +15,7 @@ const connect = () => {
     
     socket.onmessage = (e) => {
         const {data,type,target} = e;
-        console.log(convertMessageToObject(data));
+        // console.log(convertMessageToObject(data));
     }
     
     socket.onclose = (e) => {

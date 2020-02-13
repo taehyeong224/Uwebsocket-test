@@ -31,6 +31,7 @@ request.onsuccess = function(event) {
     db = request.result;
     getBy("444-44-4444").then((result) => {
         console.log(result)
+        showIndexedDb(result)
     })
 };
 
@@ -122,4 +123,10 @@ const addChatInList = (message) => {
     const text = document.createTextNode(`[${dayjs(message.date).format("HH:mm")}] ${message.userId}: ${message.text}`);
     li.appendChild(text);
     listDom.appendChild(li);
+}
+
+const showIndexedDb = (data) => {
+    const dom = document.getElementById("db-list");
+    const text = document.createTextNode(JSON.stringify(data))
+    dom.appendChild(text);
 }

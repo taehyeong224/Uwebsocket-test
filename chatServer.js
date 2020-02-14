@@ -2,7 +2,7 @@ const http = require('http');
 
 const AWS = require('aws-sdk');
 AWS.config.loadFromPath('./awsconfig.json');
-const sqs = new AWS.SQS({ apiVersion: '2012-11-05'});
+const sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
 console.log("config : ", AWS.config.credentials)
 const QUEUE_URL = "https://sqs.ap-northeast-2.amazonaws.com/658082685114/test";
 const cluster = require("cluster");
@@ -28,7 +28,7 @@ if (cluster.isMaster) {
                 res.write(JSON.stringify({ msg: "success" }))
                 res.end()
             }
-    
+
             if (req.method === Method.POST) {
                 try {
                     let body = '';
@@ -41,7 +41,7 @@ if (cluster.isMaster) {
                             const result = JSON.parse(body);
                             result["createdAt"] = Number(new Date())
                             console.log(result);
-    
+
                             const sendResult = await sqs.sendMessage({
                                 QueueUrl: QUEUE_URL,
                                 MessageBody: JSON.stringify(result),
@@ -56,22 +56,26 @@ if (cluster.isMaster) {
                             ErrorHandle(res, e)
                         }
                     });
-    
+
                 } catch (e) {
                     ErrorHandle(res, e)
                 }
+            } else {
+                res.writeHead(200, { 'Content-Type': `application/json` })
+                res.write(JSON.stringify({ msg: "fail no method" }))
+                res.end()
             }
-    
+
         }
     }).listen(3000);
-    
+
     const Method = {
         GET: "GET",
         PUT: "PUT",
         POST: "POST",
         DELETE: "DELETE",
     }
-    
+
     const ErrorHandle = (res, e) => {
         console.error("error : ", e.message);
         res.writeHead(500, { 'Content-Type': `application/json` })

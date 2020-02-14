@@ -54,32 +54,32 @@ app.ws("/*", {
     },
 
     open: (ws: WebSocket, req: HttpRequest) => {
-        // ws.subscribe('home/sensors/#');
-        console.log("open > ws", ws)
-        // clients[generate()] = ws;
-        clients.push(ws);
+        console.log("hello~")
     },
     close: (ws: WebSocket, code: number, message: ArrayBuffer) => {
-        console.log("close > ws", JSON.stringify(ws))
+        console.log("close > ws", clients.get(ws))
         console.log("close > code", code)
         console.log("close > message", convertClosedMessage(message))
     }
-}).get("/test", (res: HttpResponse, req: HttpRequest) => {
+}).post("/message", (res: HttpResponse, req: HttpRequest) => {
     try {
-        console.log(process.pid)
-        for (let i = 0; i < 10; i++) {
-            clients[0].publish(`hello`, JSON.stringify({ test: "hi", i }))
-        }
-        console.log("send")
-        res.end("hi");
+        readJson(res, (obj: any) => {
+            try {
+                console.log(obj);
+                for (const item of obj) {
+                    app.publish(`hello`, JSON.stringify({ type: MessageType.RECEIVE_MESSAGE, ...item }))
+                }
+                res.end('Thanks for this json!');
+            } catch (e) {
+                console.error("error : ", e)
+                res.end("fail")
+            }
+        }, () => {
+            /* Request was prematurely aborted or invalid or missing, stop reading */
+            console.log('Invalid JSON or no data at all!');
+        });
     } catch (e) {
         console.error(e, typeof e)
-        if (typeof e === "string" && e === "Invalid access of closed uWS.WebSocket/SSLWebSocket.") {
-            clients = []
-        }
-        if (clients[0] === undefined) {
-            clients = []
-        }
         res.end("error")
     }
 
@@ -88,7 +88,7 @@ app.ws("/*", {
         console.log('Listening to port 9001', socket, typeof socket, Object.keys(socket));
     }
 })
-let clients: WebSocket[] = [];
+const clients = new WeakMap();
 const convertClientMessage = (message: ArrayBuffer): CustomMessage => JSON.parse(bufToString(message));
 const convertClosedMessage = (message: ArrayBuffer): string => bufToString(message);
 const bufToString = (buf: ArrayBuffer): string => {
@@ -114,5 +114,46 @@ interface CustomMessage {
 }
 
 enum MessageType {
-    "SUBSCRIBE" = "SUBSCRIBE"
+    "SUBSCRIBE" = "SUBSCRIBE",
+    "RECEIVE_MESSAGE" = "RECEIVE_MESSAGE"
+}
+
+/* Helper function for reading a posted JSON body */
+function readJson(res: HttpResponse, cb: Function, err: any) {
+    let buffer: any;
+    /* Register data cb */
+    res.onData((ab, isLast) => {
+        let chunk: any = Buffer.from(ab);
+        if (isLast) {
+            let json: any;
+            if (buffer) {
+                try {
+                    json = JSON.parse(<any>Buffer.concat([buffer, chunk]));
+                } catch (e) {
+                    /* res.close calls onAborted */
+                    res.close();
+                    return;
+                }
+                cb(json);
+            } else {
+                try {
+                    json = JSON.parse(chunk);
+                } catch (e) {
+                    /* res.close calls onAborted */
+                    res.close();
+                    return;
+                }
+                cb(json);
+            }
+        } else {
+            if (buffer) {
+                buffer = Buffer.concat([buffer, chunk]);
+            } else {
+                buffer = Buffer.concat([chunk]);
+            }
+        }
+    });
+
+    /* Register error cb */
+    res.onAborted(err);
 }

@@ -7,10 +7,10 @@ function sendMessage() {
         message
       })
       .then(function (response) {
-        addChatInList({date: Number(new Date()), userId, text: message})
+        addChatInList({createdAt: Number(new Date()), userId, message: message})
       })
       .catch(function (error) {
-        addChatInList({date: Number(new Date()), userId, text: message})
+        addChatInList({createdAt: Number(new Date()), userId, message: message})
       });
 }
 
@@ -103,6 +103,9 @@ const convertMessageToObject = (data) => JSON.parse(data);
 const executeJob = message => {
     switch(message.type) {
         case MessageType.RECEIVE_MESSAGE:
+            if (!checkMessageIsMe(message.userId)) {
+                addChatInList(message)
+            }
             break;
     }
 }
@@ -110,9 +113,12 @@ const executeJob = message => {
 const MessageType = {
     RECEIVE_MESSAGE: "RECEIVE_MESSAGE"
 }
-
+const checkMessageIsMe = (userId) => {
+    const myId = document.getElementById("user").value;
+    return userId === myId;
+}
 const addChatInList = (message) => {
-    if (!message || !message.text) {
+    if (!message || !message.message) {
         throw new Error("no message");
     }
     const listDom = document.getElementById("chat-list");
@@ -120,7 +126,7 @@ const addChatInList = (message) => {
         throw new Error("no chat-list");
     }
     const li = document.createElement("li")
-    const text = document.createTextNode(`[${dayjs(message.date).format("HH:mm")}] ${message.userId}: ${message.text}`);
+    const text = document.createTextNode(`[${dayjs(message.createdAt).format("HH:mm")}] ${message.userId}: ${message.message}`);
     li.appendChild(text);
     listDom.appendChild(li);
 }

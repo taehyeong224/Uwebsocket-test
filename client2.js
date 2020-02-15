@@ -1,28 +1,15 @@
 const VERSION = '1.0.0';
-// const CHAT_SERVER_URL = `http://localhost:3000/chat`;
-const CHAT_SERVER_URL = `http://52.79.172.143:3000/chat`;
-// const WEB_SOCKET_URL = `ws://localhost:9001`;
-const WEB_SOCKET_URL = `ws://52.79.172.143:9001`;
+const CHAT_SERVER_URL = `http://localhost:3000/chat`;
+// const CHAT_SERVER_URL = `http://52.79.172.143:3000/chat`;
+const WEB_SOCKET_URL = `ws://localhost:9001`;
+// const WEB_SOCKET_URL = `ws://52.79.172.143:9001`;
+let socket;
 
 function sendMessage() {
-    console.log("hi")
     const userId = document.getElementById("user").value;
     const message = document.getElementById("input").value;
-    axios({
-        headers: { 'Content-Type': 'application/json' },
-        method: 'post', // default
-        baseURL: CHAT_SERVER_URL,
-        data: {
-            userId,
-            message
-        }
-
-    }).then(function (response) {
-        addChatInList({ createdAt: Number(new Date()), userId, message: message })
-    })
-        .catch(function (error) {
-            addChatInList({ createdAt: Number(new Date()), userId, message: message })
-        });
+    socket.send(JSON.stringify({type: MessageType.SEND_MESSAGE, data: {userId, message}}))
+    addChatInList({ createdAt: Number(new Date()), userId, message: message })
 }
 
 if (!window.indexedDB) {
@@ -80,7 +67,7 @@ const getBy = async (key) => {
     })
 }
 const connect = () => {
-    const socket = new WebSocket(WEB_SOCKET_URL);
+    socket = new WebSocket(WEB_SOCKET_URL);
 
     socket.onopen = () => {
         console.log("on open")
@@ -126,7 +113,8 @@ const executeJob = message => {
 
 const MessageType = {
     RECEIVE_MESSAGE: "RECEIVE_MESSAGE",
-    VERSION: "VERSION"
+    VERSION: "VERSION",
+    SEND_MESSAGE: "SEND_MESSAGE",
 }
 const checkMessageIsMe = (userId) => {
     const myId = document.getElementById("user").value;

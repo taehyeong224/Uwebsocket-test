@@ -1,4 +1,9 @@
 const { App } = require("uWebSockets.js")
+const AWS = require('aws-sdk');
+AWS.config.loadFromPath('./awsconfig.json');
+const sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
+console.log("config : ", AWS.config.credentials)
+const QUEUE_URL = "https://sqs.ap-northeast-2.amazonaws.com/658082685114/test";
 
 const app = App()
 
@@ -12,7 +17,7 @@ app.ws("/*", {
 
     open: (ws, req) => {
         console.log("hello~")
-        ws.send(JSON.stringify({type: MessageType.VERSION, value: '1.0.0'}))
+        ws.send(JSON.stringify({ type: MessageType.VERSION, value: '1.0.0' }))
     },
     close: (ws, code, message) => {
         console.log("close > ws", clients.get(ws))
@@ -57,10 +62,23 @@ const addSubscribe = (ws, message) => {
     ws.subscribe(`${message.subscribe}`);
 };
 
+const sendMessageToSQS = async message => {
+    message["createdAt"] = Number(new Date())
+    const sendResult = await sqs.sendMessage({
+        QueueUrl: QUEUE_URL,
+        MessageBody: JSON.stringify(message),
+        DelaySeconds: 0,
+    }).promise();
+    console.log("sendResult : ", sendResult)
+    console.log("MessageId : ", sendResult.MessageId)
+}
 const excuteMessage = (ws, message) => {
     switch (message.type) {
         case MessageType.SUBSCRIBE:
             addSubscribe(ws, message);
+            break;
+        case MessageType.SEND_MESSAGE:
+            sendMessageToSQS(message);
             break;
     }
 }
@@ -68,7 +86,8 @@ const excuteMessage = (ws, message) => {
 const MessageType = {
     SUBSCRIBE: "SUBSCRIBE",
     RECEIVE_MESSAGE: "RECEIVE_MESSAGE",
-    VERSION: "VERSION"
+    VERSION: "VERSION",
+    SEND_MESSAGE: "SEND_MESSAGE"
 }
 
 /* Helper function for reading a posted JSON body */

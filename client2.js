@@ -1,3 +1,5 @@
+const VERSION = '1.0.0';
+
 function sendMessage() {
     console.log("hi")
     const userId = document.getElementById("user").value;
@@ -112,11 +114,15 @@ const executeJob = message => {
                 addChatInList(message)
             }
             break;
+        case MessageType.VERSION:
+            console.log(`html version is ${VERSION}, server version is ${message.value}`)    
+            break;
     }
 }
 
 const MessageType = {
-    RECEIVE_MESSAGE: "RECEIVE_MESSAGE"
+    RECEIVE_MESSAGE: "RECEIVE_MESSAGE",
+    VERSION: "VERSION"
 }
 const checkMessageIsMe = (userId) => {
     const myId = document.getElementById("user").value;

@@ -1,8 +1,8 @@
 const VERSION = '1.0.0';
-const CHAT_SERVER_URL = `http://localhost:3000/chat`;
-// const CHAT_SERVER_URL = `http://52.79.172.143:3000/chat`;
-const WEB_SOCKET_URL = `ws://localhost:9001`;
-// const WEB_SOCKET_URL = `ws://52.79.172.143:9001`;
+// const CHAT_SERVER_URL = `http://localhost:3000/chat`;
+const CHAT_SERVER_URL = `http://52.79.172.143:3000/chat`;
+// const WEB_SOCKET_URL = `ws://localhost:9001`;
+const WEB_SOCKET_URL = `ws://52.79.172.143:9001`;
 let socket;
 
 function sendMessage() {

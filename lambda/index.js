@@ -4,9 +4,6 @@ const AWS = require("aws-sdk");
 const sqs = new AWS.SQS();
 const CHAT_SERVER_URL = `http://52.79.172.143:9001/message`;
 exports.handler = async (event) => {
-    const queueUrl = event.QueueUrl;
-    console.log(`queueUrl = ${queueUrl}`)
-    //console.log('Received event:', JSON.stringify(event, null, 2));
     for (const {body} of event.Records) {
         const {userId, message, createdAt} = JSON.parse(body);
         console.log('body: ', {userId, message, createdAt});
@@ -39,7 +36,7 @@ const deleteMessages = (url, messages) => {
     }).promise();
 }
 
-const sendRequest = ({userId, message, createdAt}) => {
+const sendRequest = async ({userId, message, createdAt}) => {
     try {
         await axios({
             headers: { 'Content-Type': 'application/json' },

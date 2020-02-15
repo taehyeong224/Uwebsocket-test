@@ -6,6 +6,7 @@ console.log("config : ", AWS.config.credentials)
 const QUEUE_URL = "https://sqs.ap-northeast-2.amazonaws.com/658082685114/test";
 
 const app = App()
+const VERSION = "1.0.0"
 
 app.ws("/*", {
     compression: 0,
@@ -17,7 +18,7 @@ app.ws("/*", {
 
     open: (ws, req) => {
         console.log("hello~")
-        ws.send(JSON.stringify({ type: MessageType.VERSION, value: '1.0.0' }))
+        ws.send(JSON.stringify({ type: MessageType.VERSION, value: VERSION }))
     },
     close: (ws, code, message) => {
         console.log("close > ws", clients.get(ws))

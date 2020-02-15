@@ -109,6 +109,6 @@ dist
 .vscode/
 
 package-lock.json
-app.js
+# app.js
 index.js
 awsconfig.json

@@ -8,6 +8,7 @@ let socket;
 function sendMessage() {
     const userId = document.getElementById("user").value;
     const message = document.getElementById("input").value;
+    console.log(`sendMessage : {userId: ${userId}, message: ${message}}`);
     socket.send(JSON.stringify({type: MessageType.SEND_MESSAGE, data: {userId, message}}))
     addChatInList({ createdAt: Number(new Date()), userId, message: message })
 }

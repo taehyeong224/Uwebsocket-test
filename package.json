@@ -20,6 +20,7 @@
   "homepage": "https://github.com/taehyeong224/Uwebsocket-test#readme",
   "dependencies": {
     "aws-sdk": "^2.617.0",
+    "axios": "^0.19.2",
     "lodash": "^4.17.15",
     "shortid": "^2.2.15",
     "uWebSockets.js": "github:uNetworking/uWebSockets.js#v17.1.0",

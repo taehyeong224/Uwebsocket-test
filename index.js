@@ -24,9 +24,7 @@ app.ws("/*", {
         readJson(res, (obj) => {
             try {
                 console.log(obj);
-                for (const item of obj) {
-                    app.publish(`hello`, JSON.stringify({ type: MessageType.RECEIVE_MESSAGE, ...item }))
-                }
+                app.publish(`hello`, JSON.stringify({ type: MessageType.RECEIVE_MESSAGE, ...obj }))
                 res.end('Thanks for this json!');
             } catch (e) {
                 console.error("error : ", e)

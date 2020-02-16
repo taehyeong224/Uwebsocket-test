@@ -65,6 +65,7 @@ const addSubscribe = (ws, message) => {
 
 const sendMessageToSQS = async message => {
     message["createdAt"] = Number(new Date())
+    console.log(`sendMessageToSQS : ${JSON.stringify(message)}`)
     const sendResult = await sqs.sendMessage({
         QueueUrl: QUEUE_URL,
         MessageBody: JSON.stringify(message),

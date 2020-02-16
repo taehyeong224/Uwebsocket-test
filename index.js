@@ -8,6 +8,8 @@ const QUEUE_URL = "https://sqs.ap-northeast-2.amazonaws.com/658082685114/test";
 const app = App()
 const VERSION = "1.0.0"
 
+// const LATEST_MESSAGES = [];
+
 app.ws("/*", {
     compression: 0,
     maxPayloadLength: 16 * 1024 * 1024,

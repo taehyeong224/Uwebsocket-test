@@ -5,19 +5,26 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.8.20/dayjs.min.js"></script>
     
     <script src="client2.js"></script>
+    <style>
+        #chat-input { 
+            position: fixed; 
+            bottom: 0; 
+            width: 100%; 
+        }
+    </style>
 </head>
 <body>
     <div id="db-list">
-
     </div>
     <div>
         <ul id="chat-list"></ul>
     </div>
-    <div>
+    <div id="chat-input">
         <label for="userId">이름</label>
         <input type="text" id="user"/>
-        <input type="text" id="input"/>
+        <input type="text" id="input" onKeypress="checkEnterKey()"/>
         <button onclick="sendMessage()">전송</button>
+        <button onclick="clearChat()">싹지우기</button>
     </div>
 </body>
 </html>

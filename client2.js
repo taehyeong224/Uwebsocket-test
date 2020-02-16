@@ -5,14 +5,28 @@ const CHAT_SERVER_URL = `http://52.79.172.143:3000/chat`;
 const WEB_SOCKET_URL = `ws://52.79.172.143:9001`;
 let socket;
 
+function checkEnterKey() {
+    if (event.keyCode == 13) {
+        sendMessage()
+    }
+}
 function sendMessage() {
     const userId = document.getElementById("user").value;
-    const message = document.getElementById("input").value;
+    const messageDom = document.getElementById("input");
+    const message = messageDom.value;
     console.log(`sendMessage : {userId: ${userId}, message: ${message}}`);
-    socket.send(JSON.stringify({type: MessageType.SEND_MESSAGE, data: {userId, message}}))
+    socket.send(JSON.stringify({ type: MessageType.SEND_MESSAGE, data: { userId, message } }))
     addChatInList({ createdAt: Number(new Date()), userId, message: message })
+    messageDom.value = ""
 }
 
+function clearChat() {
+    console.log("clear")
+    const chatList = document.getElementById("chat-list");
+    while (chatList.firstChild) {
+        chatList.removeChild(chatList.firstChild);
+    }
+}
 if (!window.indexedDB) {
     window.alert("Your browser doesn't support a stable version of IndexedDB. Such and such feature will not be available.")
 }
@@ -107,7 +121,7 @@ const executeJob = message => {
             }
             break;
         case MessageType.VERSION:
-            console.log(`html version is ${VERSION}, server version is ${message.value}`)    
+            console.log(`html version is ${VERSION}, server version is ${message.value}`)
             break;
     }
 }

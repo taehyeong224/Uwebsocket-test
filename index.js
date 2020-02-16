@@ -22,14 +22,14 @@ app.ws("/*", {
         console.log("hello~")
         CLIENT_COUNT += 1;
         ws.send(JSON.stringify({ type: MessageType.VERSION, value: VERSION }))
-        ws.send(JSON.stringify({ type: MessageType.CLIENT_COUNT, value: CLIENT_COUNT }))
+        app.publish(`hello`, JSON.stringify({ type: MessageType.CLIENT_COUNT, value: CLIENT_COUNT }))
     },
     close: (ws, code, message) => {
         console.log("close > ws", clients.get(ws))
         console.log("close > code", code)
         console.log("close > message", convertClosedMessage(message))
         CLIENT_COUNT -= 1;
-        ws.send(JSON.stringify({ type: MessageType.CLIENT_COUNT, value: CLIENT_COUNT }))
+        app.publish(`hello`, JSON.stringify({ type: MessageType.CLIENT_COUNT, value: CLIENT_COUNT }))
     }
 }).post("/message", (res, req) => {
     try {

@@ -9,7 +9,7 @@ const app = App()
 const VERSION = "1.0.0"
 
 // const LATEST_MESSAGES = [];
-
+let CLIENT_COUNT = 0;
 app.ws("/*", {
     compression: 0,
     maxPayloadLength: 16 * 1024 * 1024,
@@ -20,12 +20,16 @@ app.ws("/*", {
 
     open: (ws, req) => {
         console.log("hello~")
+        CLIENT_COUNT += 1;
         ws.send(JSON.stringify({ type: MessageType.VERSION, value: VERSION }))
+        ws.send(JSON.stringify({ type: MessageType.CLIENT_COUNT, value: CLIENT_COUNT }))
     },
     close: (ws, code, message) => {
         console.log("close > ws", clients.get(ws))
         console.log("close > code", code)
         console.log("close > message", convertClosedMessage(message))
+        CLIENT_COUNT -= 1;
+        ws.send(JSON.stringify({ type: MessageType.CLIENT_COUNT, value: CLIENT_COUNT }))
     }
 }).post("/message", (res, req) => {
     try {
@@ -91,7 +95,8 @@ const MessageType = {
     SUBSCRIBE: "SUBSCRIBE",
     RECEIVE_MESSAGE: "RECEIVE_MESSAGE",
     VERSION: "VERSION",
-    SEND_MESSAGE: "SEND_MESSAGE"
+    SEND_MESSAGE: "SEND_MESSAGE",
+    CLIENT_COUNT: "CLIENT_COUNT"
 }
 
 /* Helper function for reading a posted JSON body */

@@ -123,6 +123,9 @@ const executeJob = message => {
         case MessageType.VERSION:
             console.log(`html version is ${VERSION}, server version is ${message.value}`)
             break;
+        case MessageType.CLIENT_COUNT:
+            setClientCount(message);
+            break;     
     }
 }
 
@@ -130,6 +133,7 @@ const MessageType = {
     RECEIVE_MESSAGE: "RECEIVE_MESSAGE",
     VERSION: "VERSION",
     SEND_MESSAGE: "SEND_MESSAGE",
+    CLIENT_COUNT: "CLIENT_COUNT"
 }
 const checkMessageIsMe = (userId) => {
     const myId = document.getElementById("user").value;
@@ -147,6 +151,11 @@ const addChatInList = (message) => {
     const text = document.createTextNode(`[${dayjs(message.createdAt).format("HH:mm")}] ${message.userId}: ${message.message}`);
     li.appendChild(text);
     listDom.appendChild(li);
+}
+
+const setClientCount = (message) => {
+    const clientCountDom = document.getElementById("client-count")
+    clientCountDom.value = `${message.value} 명 접속 중`;
 }
 
 const showIndexedDb = (data) => {

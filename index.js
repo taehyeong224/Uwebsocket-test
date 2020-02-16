@@ -22,7 +22,6 @@ app.ws("/*", {
         console.log("hello~")
         CLIENT_COUNT += 1;
         ws.send(JSON.stringify({ type: MessageType.VERSION, value: VERSION }))
-        app.publish(`hello`, JSON.stringify({ type: MessageType.CLIENT_COUNT, value: CLIENT_COUNT }))
     },
     close: (ws, code, message) => {
         console.log("close > ws", clients.get(ws))
@@ -67,6 +66,7 @@ const bufToString = buf => {
 
 const addSubscribe = (ws, message) => {
     ws.subscribe(`${message.subscribe}`);
+    app.publish(`hello`, JSON.stringify({ type: MessageType.CLIENT_COUNT, value: CLIENT_COUNT }))
 };
 
 const sendMessageToSQS = async message => {

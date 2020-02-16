@@ -114,6 +114,7 @@ connect();
 const convertMessageToObject = (data) => JSON.parse(data);
 
 const executeJob = message => {
+    console.log(message.type)
     switch (message.type) {
         case MessageType.RECEIVE_MESSAGE:
             if (!checkMessageIsMe(message.userId)) {
@@ -154,8 +155,9 @@ const addChatInList = (message) => {
 }
 
 const setClientCount = (message) => {
+    console.log(message)
     const clientCountDom = document.getElementById("client-count")
-    clientCountDom.value = `${message.value} 명 접속 중`;
+    clientCountDom.innerHTML = `${message.value} 명 접속 중`;
 }
 
 const showIndexedDb = (data) => {

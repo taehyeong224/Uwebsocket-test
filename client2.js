@@ -5,6 +5,18 @@ const CHAT_SERVER_URL = `http://52.79.172.143:3000/chat`;
 const WEB_SOCKET_URL = `ws://52.79.172.143:9001`;
 let socket;
 
+const MessageType = {
+    SUBSCRIBE: "SUBSCRIBE",
+    UNSUBSCRIBE: "UNSUBSCRIBE",
+    RECEIVE_MESSAGE: "RECEIVE_MESSAGE",
+    VERSION: "VERSION",
+    SEND_MESSAGE: "SEND_MESSAGE",
+    CLIENT_COUNT: "CLIENT_COUNT",
+    ROOM_SUBSCRIBE_COUNT: "ROOM_SUBSCRIBE_COUNT",
+    LEAVE_ROOM: "LEAVE_ROOM",
+    JOIN_ROOM: "JOIN_ROOM"
+}
+
 function checkEnterKey() {
     if (event.keyCode == 13) {
         sendMessage()
@@ -61,60 +73,6 @@ function subscribe() {
     setRoomTitle();
 }
 
-if (!window.indexedDB) {
-    window.alert("Your browser doesn't support a stable version of IndexedDB. Such and such feature will not be available.")
-}
-let db;
-const dbName = "MyTestDatabase";
-const request = window.indexedDB.open(dbName);
-request.onerror = function (event) {
-    // request.errorCode 에 대해 무언가를 한다!
-    console.log("db error : ", request.errorCode)
-    console.log("db error : ", event.target.errorCode)
-};
-request.onsuccess = function (event) {
-    // request.result 에 대해 무언가를 한다!
-    console.log("db onsuccess : ", request.result)
-    db = request.result;
-    getBy("444-44-4444").then((result) => {
-        console.log(result)
-        showIndexedDb(result)
-    })
-};
-
-// This is what our customer data looks like.
-const customerData = [
-    { ssn: "444-44-4444", name: "Bill", age: 35, email: "bill@company.com" },
-    { ssn: "555-55-5555", name: "Donna", age: 32, email: "donna@home.org" }
-];
-
-// This event is only implemented in recent browsers   
-request.onupgradeneeded = function (event) {
-    console.log("onupgradeneeded")
-    const db = event.target.result;
-
-    // Create an objectStore for this database
-    const objectStore = db.createObjectStore("customers", { keyPath: "ssn", autoIncrement: true });
-    objectStore.createIndex("name", "name", { unique: false });
-    objectStore.createIndex("email", "email", { unique: true });
-
-    objectStore.transaction.oncomplete = function (event) {
-        // Store values in the newly created objectStore.
-        const customerObjectStore = db.transaction("customers", "readwrite").objectStore("customers");
-        customerData.forEach(function (customer) {
-            customerObjectStore.add(customer);
-        });
-    };
-};
-
-
-const getBy = async (key) => {
-    return new Promise((resolve, reject) => {
-        db.transaction("customers").objectStore("customers").get(key).onsuccess = function (event) {
-            resolve(event.target.result);
-        };
-    })
-}
 const connect = () => {
     socket = new WebSocket(WEB_SOCKET_URL);
 
@@ -162,26 +120,14 @@ const executeJob = message => {
             break;
         case MessageType.LEAVE_ROOM:
             showLeave(message.who);
-            break;     
+            break;
         case MessageType.JOIN_ROOM:
             showJoin(message.who);
-            break;        
+            break;
         case MessageType.ROOM_SUBSCRIBE_COUNT:
             setRoomSubscribeCount(message.value);
-            break;    
+            break;
     }
-}
-
-const MessageType = {
-    SUBSCRIBE: "SUBSCRIBE",
-    UNSUBSCRIBE: "UNSUBSCRIBE",
-    RECEIVE_MESSAGE: "RECEIVE_MESSAGE",
-    VERSION: "VERSION",
-    SEND_MESSAGE: "SEND_MESSAGE",
-    CLIENT_COUNT: "CLIENT_COUNT",
-    ROOM_SUBSCRIBE_COUNT: "ROOM_SUBSCRIBE_COUNT",
-    LEAVE_ROOM: "LEAVE_ROOM",
-    JOIN_ROOM: "JOIN_ROOM"
 }
 const checkMessageIsMe = (userId) => {
     const myId = document.getElementById("user").value;

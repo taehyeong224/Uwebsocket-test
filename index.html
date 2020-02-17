@@ -16,6 +16,7 @@
 <body>
     <div id="db-list">
     </div>
+    <div id="room-title"></div>
     <div id="client-count">
         0 명 접속 중
     </div>
@@ -28,6 +29,8 @@
         <input type="text" id="input" onKeypress="checkEnterKey()"/>
         <button onclick="sendMessage()">전송</button>
         <button onclick="clearChat()">싹지우기</button>
+        <input type="text" id="room"/>
+        <button onclick="subscribe()">입장하기</button>
     </div>
 </body>
 </html>

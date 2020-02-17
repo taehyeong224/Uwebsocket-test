@@ -1,0 +1,10 @@
+config:
+    target: "ws://localhost:9001/"
+    phases:
+      - duration: 20
+        arrivalRate: 100
+scenarios:
+    - engine: "ws"
+      flow:
+        - send: "{\"type\":\"SEND_MESSAGE\",\"data\":{\"userId\":\"1234\",\"message\":\"1234\"}}"
+        - think: 1

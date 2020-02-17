@@ -7,7 +7,7 @@ const QUEUE_URL = "https://sqs.ap-northeast-2.amazonaws.com/658082685114/test";
 
 const app = App()
 const VERSION = "1.0.0"
-
+const clientSub = new WeakMap();
 // const LATEST_MESSAGES = [];
 let CLIENT_COUNT = 0;
 app.ws("/*", {
@@ -64,10 +64,23 @@ const bufToString = buf => {
     return enc.decode(arrayBuffer);
 }
 
-const addSubscribe = (ws, message) => {
-    ws.subscribe(`${message.subscribe}`);
-    app.publish(`hello`, JSON.stringify({ type: MessageType.CLIENT_COUNT, value: CLIENT_COUNT }))
+const addSubscribe = (ws, {subscribe, userId}) => {
+    ws.subscribe(subscribe);
+    clientSub.set(ws, subscribe);
+    app.publish(subscribe, JSON.stringify({ type: MessageType.CLIENT_COUNT, value: CLIENT_COUNT }))
+    app.publish(subscribe, JSON.stringify({ type: MessageType.JOIN_ROOM, who: userId }))
 };
+
+const unSubscribe = (ws, {subscribe, userId}) => {
+    const unsub = clientSub.get(ws);
+    ws.unsubscribe(unsub);
+    console.log(`subscribe : ${subscribe} unsub : ${unsub}`)
+    clientSub.delete(ws);
+    if (unsub !== undefined && subscribe !== unsub) {
+        console.log("간다")
+        app.publish(unsub, JSON.stringify({ type: MessageType.LEAVE_ROOM, who: userId }))
+    }
+}
 
 const sendMessageToSQS = async message => {
     message["createdAt"] = Number(new Date())
@@ -83,7 +96,8 @@ const sendMessageToSQS = async message => {
 const excuteMessage = (ws, message) => {
     switch (message.type) {
         case MessageType.SUBSCRIBE:
-            addSubscribe(ws, message);
+            unSubscribe(ws, {subscribe: message.subscribe, userId: message.userId});
+            addSubscribe(ws, {subscribe: message.subscribe, userId: message.userId});
             break;
         case MessageType.SEND_MESSAGE:
             sendMessageToSQS(message);
@@ -96,7 +110,9 @@ const MessageType = {
     RECEIVE_MESSAGE: "RECEIVE_MESSAGE",
     VERSION: "VERSION",
     SEND_MESSAGE: "SEND_MESSAGE",
-    CLIENT_COUNT: "CLIENT_COUNT"
+    CLIENT_COUNT: "CLIENT_COUNT",
+    LEAVE_ROOM: "LEAVE_ROOM",
+    JOIN_ROOM: "JOIN_ROOM"
 }
 
 /* Helper function for reading a posted JSON body */

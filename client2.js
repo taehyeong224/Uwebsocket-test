@@ -1,8 +1,8 @@
 const VERSION = '1.0.0';
-// const CHAT_SERVER_URL = `http://localhost:3000/chat`;
-const CHAT_SERVER_URL = `http://52.79.172.143:3000/chat`;
-// const WEB_SOCKET_URL = `ws://localhost:9001`;
-const WEB_SOCKET_URL = `ws://52.79.172.143:9001`;
+const CHAT_SERVER_URL = `http://localhost:3000/chat`;
+// const CHAT_SERVER_URL = `http://52.79.172.143:3000/chat`;
+const WEB_SOCKET_URL = `ws://localhost:9001`;
+// const WEB_SOCKET_URL = `ws://52.79.172.143:9001`;
 let socket;
 
 function checkEnterKey() {
@@ -27,6 +27,32 @@ function clearChat() {
         chatList.removeChild(chatList.firstChild);
     }
 }
+let myroom = "";
+function setRoomTitle() {
+    const dom = document.getElementById("room-title");
+    dom.innerHTML = myroom;
+}
+function subscribe() {
+    const userId = document.getElementById("user").value;
+    if (!userId || userId === "") {
+        alert("사용자 이름을 적어 주세요");
+        return;
+    }
+
+    const roomDom = document.getElementById("room");
+    if (!roomDom.value || roomDom.value === "") {
+        alert("방 이름을 적어 주세요");
+        return;
+    }
+    if (roomDom.value === myroom) {
+        console.log("이미 접속 중")
+        return;
+    }
+    myroom = roomDom.value;
+    socket.send(JSON.stringify({ type: MessageType.SUBSCRIBE, subscribe: roomDom.value, userId }))
+    setRoomTitle();
+}
+
 if (!window.indexedDB) {
     window.alert("Your browser doesn't support a stable version of IndexedDB. Such and such feature will not be available.")
 }
@@ -86,7 +112,6 @@ const connect = () => {
 
     socket.onopen = () => {
         console.log("on open")
-        socket.send(JSON.stringify({ type: "SUBSCRIBE", subscribe: "hello" }))
     }
 
 
@@ -126,15 +151,24 @@ const executeJob = message => {
             break;
         case MessageType.CLIENT_COUNT:
             setClientCount(message);
+            break;
+        case MessageType.LEAVE_ROOM:
+            showLeave(message.who);
             break;     
+        case MessageType.JOIN_ROOM:
+            showJoin(message.who);
+            break;        
     }
 }
 
 const MessageType = {
+    SUBSCRIBE: "SUBSCRIBE",
     RECEIVE_MESSAGE: "RECEIVE_MESSAGE",
     VERSION: "VERSION",
     SEND_MESSAGE: "SEND_MESSAGE",
-    CLIENT_COUNT: "CLIENT_COUNT"
+    CLIENT_COUNT: "CLIENT_COUNT",
+    LEAVE_ROOM: "LEAVE_ROOM",
+    JOIN_ROOM: "JOIN_ROOM"
 }
 const checkMessageIsMe = (userId) => {
     const myId = document.getElementById("user").value;
@@ -155,7 +189,6 @@ const addChatInList = (message) => {
 }
 
 const setClientCount = (message) => {
-    console.log(message)
     const clientCountDom = document.getElementById("client-count")
     clientCountDom.innerHTML = `${message.value} 명 접속 중`;
 }
@@ -164,4 +197,40 @@ const showIndexedDb = (data) => {
     const dom = document.getElementById("db-list");
     const text = document.createTextNode(JSON.stringify(data))
     dom.appendChild(text);
+}
+
+const showLeave = who => {
+    const userId = document.getElementById("user").value;
+    if (who === userId) {
+        clearChat()
+    }
+    if (!who || who === "") {
+        throw new Error("no who");
+    }
+    const listDom = document.getElementById("chat-list");
+    if (!listDom) {
+        throw new Error("no chat-list");
+    }
+    const li = document.createElement("li")
+    const text = document.createTextNode(`[${dayjs().format("HH:mm")}] ${who} 님이 나가셨습니다.`);
+    li.appendChild(text);
+    listDom.appendChild(li);
+}
+
+const showJoin = who => {
+    const userId = document.getElementById("user").value;
+    if (who === userId) {
+        clearChat()
+    }
+    if (!who || who === "") {
+        throw new Error("no who");
+    }
+    const listDom = document.getElementById("chat-list");
+    if (!listDom) {
+        throw new Error("no chat-list");
+    }
+    const li = document.createElement("li")
+    const text = document.createTextNode(`[${dayjs().format("HH:mm")}] ${who} 님이 들어오셨습니다.`);
+    li.appendChild(text);
+    listDom.appendChild(li);
 }

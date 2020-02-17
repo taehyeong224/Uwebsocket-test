@@ -2,7 +2,7 @@ config:
   target: "ws://52.79.172.143:9001/"
   phases:
     - duration: 20
-      arrivalRate: 50
+      arrivalRate: 100
 scenarios:
   - engine: "ws"
     flow:

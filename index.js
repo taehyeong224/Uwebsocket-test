@@ -22,21 +22,23 @@ app.ws("/*", {
     open: (ws, req) => {
         console.log("hello~")
         CLIENT_COUNT += 1;
+        ws.subscribe(`notice`);
         ws.send(JSON.stringify({ type: MessageType.VERSION, value: VERSION }))
+        app.publish(`notice`, JSON.stringify({ type: MessageType.CLIENT_COUNT, value: CLIENT_COUNT }))
     },
     close: (ws, code, message) => {
         console.log("close > ws", clients.get(ws))
         console.log("close > code", code)
         console.log("close > message", convertClosedMessage(message))
         CLIENT_COUNT -= 1;
-        app.publish(`hello`, JSON.stringify({ type: MessageType.CLIENT_COUNT, value: CLIENT_COUNT }))
+        app.publish(`notice`, JSON.stringify({ type: MessageType.CLIENT_COUNT, value: CLIENT_COUNT }))
     }
 }).post("/message", (res, req) => {
     try {
         readJson(res, (obj) => {
             try {
                 console.log(obj);
-                app.publish(`hello`, JSON.stringify({ type: MessageType.RECEIVE_MESSAGE, ...obj }))
+                app.publish(obj.room, JSON.stringify({ type: MessageType.RECEIVE_MESSAGE, ...obj }))
                 res.end('Thanks for this json!');
             } catch (e) {
                 console.error("error : ", e)
@@ -84,7 +86,7 @@ const sendMessageToSQS = async message => {
     console.log(`sendMessageToSQS : ${JSON.stringify(message)}`)
     const sendResult = await sqs.sendMessage({
         QueueUrl: QUEUE_URL,
-        MessageBody: JSON.stringify({ userId: message.data.userId, message: message.data.message, createdAt: message.createdAt }),
+        MessageBody: JSON.stringify({ userId: message.data.userId, message: message.data.message, createdAt: message.createdAt, room: message.room }),
         DelaySeconds: 0,
     }).promise();
     console.log("sendResult : ", sendResult)

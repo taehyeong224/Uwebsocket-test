@@ -38,6 +38,7 @@ app.ws("/*", {
         readJson(res, (obj) => {
             try {
                 console.log(obj);
+                console.log(`target room : ${obj.room} `, typeof obj.room);
                 app.publish(obj.room, JSON.stringify({ type: MessageType.RECEIVE_MESSAGE, ...obj }))
                 res.end('Thanks for this json!');
             } catch (e) {

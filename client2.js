@@ -20,7 +20,6 @@ function sendMessage() {
         messageDom.value = ""
         return;
     }
-    console.log(`sendMessage : {userId: ${userId}, message: ${message}}`);
     socket.send(JSON.stringify({ type: MessageType.SEND_MESSAGE, data: { userId, message, room: myroom } }))
     addChatInList({ createdAt: Number(new Date()), userId, message: message })
     messageDom.value = ""

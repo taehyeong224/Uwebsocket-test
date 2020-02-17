@@ -14,6 +14,12 @@ function sendMessage() {
     const userId = document.getElementById("user").value;
     const messageDom = document.getElementById("input");
     const message = messageDom.value;
+
+    if (!userId || myroom === 0) {
+        alert("정확히 입력해주세요")
+        messageDom.value = ""
+        return;
+    }
     console.log(`sendMessage : {userId: ${userId}, message: ${message}}`);
     socket.send(JSON.stringify({ type: MessageType.SEND_MESSAGE, data: { userId, message, room: myroom } }))
     addChatInList({ createdAt: Number(new Date()), userId, message: message })

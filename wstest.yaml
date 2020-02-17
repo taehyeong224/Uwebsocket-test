@@ -6,5 +6,9 @@ config:
 scenarios:
   - engine: "ws"
     flow:
-      - send: "{\"type\":\"SEND_MESSAGE\",\"data\":{\"userId\":\"1234\",\"message\":\"1234\"}}"
+      - send: "{\"type\":\"SUBSCRIBE\",\"subscribe\": \"1234\",\"userId\":\"1234\"}"
+      - think: 1
+      - send: "{\"type\":\"SEND_MESSAGE\",\"data\":{\"userId\":\"1234\",\"message\":\"{{ $randomString() }}\",\"room\":\"1234\"}}"
+      - think: 1
+      - send: "{\"type\":\"UNSUBSCRIBE\",\"unsubscribe\": \"1234\",\"userId\":\"1234\"}"
       - think: 1

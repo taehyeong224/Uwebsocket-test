@@ -86,7 +86,7 @@ const sendMessageToSQS = async message => {
     console.log(`sendMessageToSQS : ${JSON.stringify(message)}`)
     const sendResult = await sqs.sendMessage({
         QueueUrl: QUEUE_URL,
-        MessageBody: JSON.stringify({ userId: message.data.userId, message: message.data.message, createdAt: message.createdAt, room: message.room }),
+        MessageBody: JSON.stringify({ userId: message.data.userId, message: message.data.message, createdAt: message.createdAt, room: message.data.room }),
         DelaySeconds: 0,
     }).promise();
     console.log("sendResult : ", sendResult)

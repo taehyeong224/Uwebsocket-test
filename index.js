@@ -10,6 +10,7 @@ const VERSION = "1.0.0"
 const clientSub = new WeakMap();
 // const LATEST_MESSAGES = [];
 let CLIENT_COUNT = 0;
+const ROOM_SUBSCRIBE_COUNT = {};
 app.ws("/*", {
     compression: 0,
     maxPayloadLength: 16 * 1024 * 1024,
@@ -71,15 +72,11 @@ const addSubscribe = (ws, {subscribe, userId}) => {
     app.publish(subscribe, JSON.stringify({ type: MessageType.JOIN_ROOM, who: userId }))
 };
 
-const unSubscribe = (ws, {subscribe, userId}) => {
-    const unsub = clientSub.get(ws);
-    ws.unsubscribe(unsub);
-    console.log(`subscribe : ${subscribe} unsub : ${unsub}`)
+const unSubscribe = (ws, {unsubscribe, userId}) => {
+    ws.unsubscribe(unsubscribe);
     clientSub.delete(ws);
-    if (unsub !== undefined && subscribe !== unsub) {
-        console.log("간다")
-        app.publish(unsub, JSON.stringify({ type: MessageType.LEAVE_ROOM, who: userId }))
-    }
+    app.publish(unsubscribe, JSON.stringify({ type: MessageType.LEAVE_ROOM, who: userId }))
+
 }
 
 const sendMessageToSQS = async message => {
@@ -93,26 +90,50 @@ const sendMessageToSQS = async message => {
     console.log("sendResult : ", sendResult)
     console.log("MessageId : ", sendResult.MessageId)
 }
+
+const plusSubscribeCount = (subscribe) => {
+    if (ROOM_SUBSCRIBE_COUNT[subscribe] === undefined) {
+        ROOM_SUBSCRIBE_COUNT[subscribe] = 1;
+    } else {
+        ROOM_SUBSCRIBE_COUNT[subscribe] += 1;
+    }
+    app.publish(subscribe, JSON.stringify({ type: MessageType.ROOM_SUBSCRIBE_COUNT, value: ROOM_SUBSCRIBE_COUNT[subscribe] }))
+}
+const minusSubscribeCount = (subscribe) => {
+    if (ROOM_SUBSCRIBE_COUNT[subscribe] === undefined || ROOM_SUBSCRIBE_COUNT[subscribe] === 0) {
+        ROOM_SUBSCRIBE_COUNT[subscribe] = 0;
+    } else {
+        ROOM_SUBSCRIBE_COUNT[subscribe] -= 1;
+    }
+    app.publish(subscribe, JSON.stringify({ type: MessageType.ROOM_SUBSCRIBE_COUNT, value: ROOM_SUBSCRIBE_COUNT[subscribe] }))
+}
+
 const excuteMessage = (ws, message) => {
     switch (message.type) {
         case MessageType.SUBSCRIBE:
-            unSubscribe(ws, {subscribe: message.subscribe, userId: message.userId});
             addSubscribe(ws, {subscribe: message.subscribe, userId: message.userId});
+            plusSubscribeCount(message.subscribe)
             break;
         case MessageType.SEND_MESSAGE:
             sendMessageToSQS(message);
+            break;
+        case MessageType.UNSUBSCRIBE:
+            unSubscribe(ws, {unsubscribe: message.unsubscribe, userId: message.userId});
+            minusSubscribeCount(message.subscribe)
             break;
     }
 }
 
 const MessageType = {
     SUBSCRIBE: "SUBSCRIBE",
+    UNSUBSCRIBE: "UNSUBSCRIBE",
     RECEIVE_MESSAGE: "RECEIVE_MESSAGE",
     VERSION: "VERSION",
     SEND_MESSAGE: "SEND_MESSAGE",
     CLIENT_COUNT: "CLIENT_COUNT",
+    ROOM_SUBSCRIBE_COUNT: "ROOM_SUBSCRIBE_COUNT",
     LEAVE_ROOM: "LEAVE_ROOM",
-    JOIN_ROOM: "JOIN_ROOM"
+    JOIN_ROOM: "JOIN_ROOM",
 }
 
 /* Helper function for reading a posted JSON body */

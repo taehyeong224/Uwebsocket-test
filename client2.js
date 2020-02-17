@@ -48,6 +48,9 @@ function subscribe() {
         console.log("이미 접속 중")
         return;
     }
+    if (myroom !== "") {
+        socket.send(JSON.stringify({ type: MessageType.UNSUBSCRIBE, unsubscribe: myroom, userId }))
+    }
     myroom = roomDom.value;
     socket.send(JSON.stringify({ type: MessageType.SUBSCRIBE, subscribe: roomDom.value, userId }))
     setRoomTitle();
@@ -158,15 +161,20 @@ const executeJob = message => {
         case MessageType.JOIN_ROOM:
             showJoin(message.who);
             break;        
+        case MessageType.ROOM_SUBSCRIBE_COUNT:
+            setRoomSubscribeCount(message.value);
+            break;    
     }
 }
 
 const MessageType = {
     SUBSCRIBE: "SUBSCRIBE",
+    UNSUBSCRIBE: "UNSUBSCRIBE",
     RECEIVE_MESSAGE: "RECEIVE_MESSAGE",
     VERSION: "VERSION",
     SEND_MESSAGE: "SEND_MESSAGE",
     CLIENT_COUNT: "CLIENT_COUNT",
+    ROOM_SUBSCRIBE_COUNT: "ROOM_SUBSCRIBE_COUNT",
     LEAVE_ROOM: "LEAVE_ROOM",
     JOIN_ROOM: "JOIN_ROOM"
 }
@@ -190,7 +198,12 @@ const addChatInList = (message) => {
 
 const setClientCount = (message) => {
     const clientCountDom = document.getElementById("client-count")
-    clientCountDom.innerHTML = `${message.value} 명 접속 중`;
+    clientCountDom.innerHTML = `총 ${message.value} 명 접속 중`;
+}
+
+const setRoomSubscribeCount = (count) => {
+    const roomSubCount = document.getElementById("room-sub-count")
+    roomSubCount.innerHTML = `이 방에 ${count} 명 접속 중`;
 }
 
 const showIndexedDb = (data) => {
@@ -234,3 +247,4 @@ const showJoin = who => {
     li.appendChild(text);
     listDom.appendChild(li);
 }
+

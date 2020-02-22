@@ -36,14 +36,17 @@ if (cluster.isMaster) {
         /* Handlers */
         message: async (ws, message, isBinary) => {
             console.log("process id : ", process.pid)
-            await sleep(3000)
-            excuteMessage(ws, convertClientMessage(message));
+            // await sleep(3000)
+            // excuteMessage(ws, convertClientMessage(message));
         },
 
         open: (ws, req) => {
         },
         close: (ws, code, message) => {
         }
+    }).any("/*", (res, req) => {
+        console.log("hello : ", process.pid)
+        res.end()
     }).listen(9001, (socket) => {
         if (socket) {
             console.log(`Listening to port 9001`);

@@ -1,8 +1,9 @@
 config:
-    target: "ws://localhost:9001/"
+    # target: "ws://localhost:9001/"
+    target: "ws://192.168.0.4:9001/"
     phases:
       - duration: 20
-        arrivalRate: 100
+        arrivalRate: 10
 scenarios:
     - engine: "ws"
       flow:
